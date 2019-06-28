@@ -11,9 +11,9 @@ node {
         env.PATH = "${dockerHome}/bin:${mavenHome}/bin:${env.PATH}"
     }
 
-    stage('Checkout') {
-        checkout scm
-    }
+    // stage('Checkout') {
+    //     checkout scm
+    // }
 
     // stage('Build'){
     //     sh "mvn clean install"
@@ -42,7 +42,7 @@ node {
     // }
 
     stage('Run App'){
-        runApp(CONTAINER_NAME, CONTAINER_TAG, DOCKER_HUB_USER, HTTP_PORT)
+        runApp(HTTP_PORT)
     }
 
 }
