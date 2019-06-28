@@ -67,7 +67,7 @@ node {
 // }
 
 def runApp(httpPort){
-    sh "docker pull nginx"
-    sh "docker run -d --rm -p $httpPort:80 --name nginx nginx"
+    sh "sudo docker pull nginx"
+    sh "sudo docker run -d --rm -p $httpPort:80 --name nginx nginx"
     echo "Application started on port: ${httpPort} (http)"
 }
