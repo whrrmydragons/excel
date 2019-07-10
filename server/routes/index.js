@@ -1,8 +1,20 @@
 const express = require("express");
 const router = express.Router();
-var XLSX = require("xlsx");
+const XLSX = require("xlsx");
+const moment = require("moment");
 
-function send_aoa_to_client(req, res, data) {
+function convertToDate(str, format = "DD-MM-YYYY", strict) {
+  const date = moment(str, format, strict); //strict mode
+  return date.isValid() ? date.toDate() : str;
+}
+
+function sendAOAToClient(req, res) {
+  let { data, dateFormat, dateStrict } = req.body;
+  dateStrict = dateStrict !== false;
+  /*transform valid strings to dates */
+  data = data.map(aoa => {
+    return aoa.map(x => convertToDate(x, dateFormat, dateStrict));
+  });
   /* generate workbook */
   var ws = XLSX.utils.aoa_to_sheet(data);
   var wb = XLSX.utils.book_new();
@@ -19,7 +31,14 @@ function send_aoa_to_client(req, res, data) {
   res.status(200).send(buf);
 }
 
-function send_json_to_client(req, res, data) {
+function sendJSONToClient(req, res) {
+   let { data, dateFormat, dateStrict } = req.body;
+  dateStrict = dateStrict !== false;
+  /*transform valid strings to dates */
+
+   data.map(row => {
+     Object.keys(row).map((key, index) => row[key] = convertToDate(row[key], dateFormat, dateStrict));
+  });
   /* generate workbook */
   var ws = XLSX.utils.json_to_sheet(data);
   var wb = XLSX.utils.book_new();
@@ -43,18 +62,18 @@ router.get("/", function(req, res, next) {
 });
 /*Get a representation of a spreadsheet in Array of arrays format */
 router.post("/aoa", function(req, res, next) {
-  const data = [["1", "2", "3", 1, 2, 3], [new Date(), "07/09/2019"]];
-  send_aoa_to_client(req, res, data);
+  // const data = [["1", "2", "3", 1, 2, 3], [new Date(), "07/09/2019"]];
+  sendAOAToClient(req, res);
 });
 
 /*Get a representation of a spreadsheet in JSON format(array of object, each object represents a row) */
 router.post("/json", function(req, res, next) {
-  const data = [
-    { a: "1", b: "2", c: "3" },
-    { a: 1, b: 2, c: 3 },
-    { a: new Date(), b: "07/09/2019" }
-  ];
-  send_json_to_client(req, res, data);
+  // const data = [
+  //   { a: "1", b: "2", c: "3" },
+  //   { a: 1, b: 2, c: 3 },
+  //   { a: new Date(), b: "07/09/2019" }
+  // ];
+  sendJSONToClient(req, res);
 });
 
 module.exports = router;
